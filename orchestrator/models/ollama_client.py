@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Iterator, Optional
 from dataclasses import dataclass
 
@@ -6,6 +7,8 @@ try:
     import ollama
 except ImportError:
     ollama = None
+
+logger = logging.getLogger(__name__)
 
 
 class OllamaUnavailableError(Exception):
@@ -45,12 +48,21 @@ class OllamaClient:
             )
             for chunk in response:
                 msg = chunk.message
-                # Content and thinking are mutually exclusive per chunk
-                # Some models stream thinking tokens first, then content tokens
-                if msg.content:
-                    yield StreamChunk(content=msg.content)
+                
+                thinking = getattr(msg, 'thinking', None)
+                content = getattr(msg, 'content', None)
+                
+                # Thinking models (Falcon H1R, Jamba) stream reasoning via msg.thinking
+                # before the actual response in msg.content.
+                # Skip thinking tokens, yield only content.
+                if thinking:
+                    logger.debug(f"[thinking] {thinking[:80]}")
+                elif content:
+                    yield StreamChunk(content=content)
+                
                 if chunk.done:
                     yield StreamChunk(content="", done=True)
+                    break
         except Exception as e:
             error_msg = str(e).lower()
             if "connection" in error_msg or "refused" in error_msg:
