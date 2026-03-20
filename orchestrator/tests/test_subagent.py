@@ -51,8 +51,11 @@ class TestSubAgent:
         spawner = SubAgentSpawner(prompts_dir=str(prompts_dir))
         context = Context(repo_root=str(tmp_path))
         
-        with pytest.raises(FileNotFoundError):
-            spawner.spawn("Query", "code", "nonexistent", context)
+        task_id = spawner.spawn("Query", "code", "nonexistent", context)
+        
+        assert task_id in context.tasks
+        assert context.tasks[task_id].status == "failed"
+        assert "not found" in context.tasks[task_id].error.lower()
 
 
 class TestContext:

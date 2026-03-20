@@ -75,9 +75,12 @@ class TestSafety:
 
 class TestValidator:
     def test_validation_result_dataclass(self):
+        from grounding.validator import ValidationResult
+        
         result = ValidationResult(
             lsp_errors=["error1"],
             test_summary="1 passed",
+            format_summary="Prettier OK",
             passed=False,
         )
         

@@ -100,11 +100,21 @@ class TestJsonRpcParsing:
 
 class TestMainEntryPoint:
     def test_run_task(self, tmp_path):
+        from unittest.mock import MagicMock, patch
+        import main
+        
         mock_loop = MagicMock()
-        mock_loop.__iter__ = MagicMock(return_value=iter([
-            MagicMock(type=main.EventType.THOUGHT, content="thinking", timestamp="2024-01-01T00:00:00"),
-            MagicMock(type=main.EventType.ANSWER, content="done", timestamp="2024-01-01T00:00:01"),
-        ]))
+        mock_event_thought = MagicMock(
+            type=main.EventType.THOUGHT, 
+            content="thinking", 
+            timestamp="2024-01-01T00:00:00"
+        )
+        mock_event_answer = MagicMock(
+            type=main.EventType.ANSWER, 
+            content="done", 
+            timestamp="2024-01-01T00:00:01"
+        )
+        mock_loop.run.return_value = iter([mock_event_thought, mock_event_answer])
         
         with patch("main.RLMLoop", return_value=mock_loop):
             events = main.run_task("test", str(tmp_path))
