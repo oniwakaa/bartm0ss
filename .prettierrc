@@ -1,0 +1,24 @@
+# Prettier configuration for bartm0ss
+# Matches Ink/Claude Code style conventions
+
+singleQuote = true
+semi = false
+trailingComma = 'es5'
+printWidth = 100
+tabWidth = 2
+useTabs = false
+
+# TypeScript/JavaScript
+overrides:
+  - files: '*.ts'
+    options:
+      parser: 'typescript'
+  - files: '*.tsx'
+    options:
+      parser: 'typescript'
+  - files: '*.json'
+    options:
+      parser: 'json'
+  - files: '*.md'
+    options:
+      parser: 'markdown'
