@@ -1,10 +1,10 @@
 import os
 
 ROOT_MODEL = os.environ.get(
-    "BARTM0SS_ROOT_MODEL", "falcon-h1r-7b-q4_k_m"
+    "BARTM0SS_ROOT_MODEL", "hf.co/tiiuae/Falcon-H1R-7B-GGUF:Q4_K_M"
 )
 SUBAGENT_MODEL = os.environ.get(
-    "BARTM0SS_SUBAGENT_MODEL", "ai21-jamba-reasoning-3b-q4_k_m"
+    "BARTM0SS_SUBAGENT_MODEL", "hf.co/bartowski/ai21labs_AI21-Jamba2-3B-GGUF:Q8_0"
 )
 
 ROOT_CONTEXT_LIMIT = int(os.environ.get("BARTM0SS_ROOT_CONTEXT_LIMIT", "8192"))

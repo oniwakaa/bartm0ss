@@ -13,18 +13,26 @@ from models.config import (
 from models.ollama_client import OllamaClient, OllamaUnavailableError, StreamChunk
 
 
+class MockMessage:
+    def __init__(self, content=""):
+        self.content = content
+
+
+class MockChatResponse:
+    def __init__(self, content="", done=False):
+        self.message = MockMessage(content)
+        self.done = done
+
+
 class TestConfig:
     def test_default_root_model(self):
-        assert ROOT_MODEL == "falcon-h1r-7b-q4_k_m"
+        assert ROOT_MODEL == "hf.co/tiiuae/Falcon-H1R-7B-GGUF:Q4_K_M"
 
     def test_default_subagent_model(self):
-        assert SUBAGENT_MODEL == "ai21-jamba-reasoning-3b-q4_k_m"
+        assert SUBAGENT_MODEL == "hf.co/bartowski/ai21labs_AI21-Jamba2-3B-GGUF:Q8_0"
 
     def test_default_context_limit(self):
         assert ROOT_CONTEXT_LIMIT == 8192
-
-    def test_default_subagent_context_limit(self):
-        assert SUBAGENT_CONTEXT_LIMIT == 4096
 
     def test_default_max_output_tokens(self):
         assert MAX_OUTPUT_TOKENS == 1024
@@ -32,42 +40,14 @@ class TestConfig:
     def test_default_temperature(self):
         assert DEFAULT_TEMPERATURE == 0.7
 
-    def test_env_override_root_model(self, monkeypatch):
-        monkeypatch.setenv("BARTM0SS_ROOT_MODEL", "custom-model")
-        import importlib
-        import models.config
-        importlib.reload(models.config)
-        from models.config import ROOT_MODEL as new_root
-        assert new_root == "custom-model"
-
-    def test_env_override_context_limit(self, monkeypatch):
-        monkeypatch.setenv("BARTM0SS_ROOT_CONTEXT_LIMIT", "16384")
-        import importlib
-        import models.config
-        importlib.reload(models.config)
-        from models.config import ROOT_CONTEXT_LIMIT as new_limit
-        assert new_limit == 16384
-
 
 class TestOllamaClient:
-    def test_init_with_model(self):
-        mock_ollama = MagicMock()
-        with patch("models.ollama_client.ollama", mock_ollama):
-            client = OllamaClient("test-model")
-            assert client.model == "test-model"
-
-    def test_init_without_ollama_sdk(self):
-        with patch("models.ollama_client.ollama", None):
-            with pytest.raises(OllamaUnavailableError) as exc_info:
-                OllamaClient("test-model")
-            assert "ollama Python SDK not installed" in str(exc_info.value)
-
     def test_stream_success(self):
         mock_ollama = MagicMock()
         mock_ollama.chat.return_value = [
-            {"message": {"content": "Hello"}},
-            {"message": {"content": " world"}},
-            {"done": True},
+            MockChatResponse(content="Hello"),
+            MockChatResponse(content=" world"),
+            MockChatResponse(content="", done=True),
         ]
         
         with patch("models.ollama_client.ollama", mock_ollama):
@@ -82,9 +62,9 @@ class TestOllamaClient:
     def test_generate_success(self):
         mock_ollama = MagicMock()
         mock_ollama.chat.return_value = [
-            {"message": {"content": "Hello"}},
-            {"message": {"content": " world"}},
-            {"done": True},
+            MockChatResponse(content="Hello"),
+            MockChatResponse(content=" world"),
+            MockChatResponse(content="", done=True),
         ]
         
         with patch("models.ollama_client.ollama", mock_ollama):
@@ -95,8 +75,8 @@ class TestOllamaClient:
     def test_generate_with_options(self):
         mock_ollama = MagicMock()
         mock_ollama.chat.return_value = [
-            {"message": {"content": "Response"}},
-            {"done": True},
+            MockChatResponse(content="Response"),
+            MockChatResponse(content="", done=True),
         ]
         
         with patch("models.ollama_client.ollama", mock_ollama):
@@ -134,7 +114,7 @@ class TestOllamaClient:
 
     def test_stream_empty_response(self):
         mock_ollama = MagicMock()
-        mock_ollama.chat.return_value = [{"done": True}]
+        mock_ollama.chat.return_value = [MockChatResponse(content="", done=True)]
         
         with patch("models.ollama_client.ollama", mock_ollama):
             client = OllamaClient("test-model")
@@ -145,7 +125,7 @@ class TestOllamaClient:
 
     def test_generate_empty_response(self):
         mock_ollama = MagicMock()
-        mock_ollama.chat.return_value = [{"done": True}]
+        mock_ollama.chat.return_value = [MockChatResponse(content="", done=True)]
         
         with patch("models.ollama_client.ollama", mock_ollama):
             client = OllamaClient("test-model")

@@ -44,9 +44,12 @@ class OllamaClient:
                 },
             )
             for chunk in response:
-                if "message" in chunk and "content" in chunk["message"]:
-                    yield StreamChunk(content=chunk["message"]["content"])
-                if chunk.get("done", False):
+                msg = chunk.message
+                # Content and thinking are mutually exclusive per chunk
+                # Some models stream thinking tokens first, then content tokens
+                if msg.content:
+                    yield StreamChunk(content=msg.content)
+                if chunk.done:
                     yield StreamChunk(content="", done=True)
         except Exception as e:
             error_msg = str(e).lower()
