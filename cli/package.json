@@ -1,0 +1,23 @@
+{
+  "name": "bartm0ss",
+  "version": "0.1.0",
+  "description": "Local-first agentic coding CLI using RLM paradigm",
+  "type": "module",
+  "bin": {
+    "bartm0ss": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts --outfile ./dist/index.js --target node",
+    "dev": "bun run --watch ./src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ink": "^5.0.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.0"
+  }
+}
